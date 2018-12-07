@@ -4,7 +4,7 @@
 // distortion curve for the waveshaper, thanks to Kevin Ennis
 // http://stackoverflow.com/questions/22312841/waveshaper-node-in-webaudio-how-to-emulate-distortion
 
-import React, { Component }   from 'react'
+import React, { PureComponent }   from 'react'
 import { string, number, bool, func } from 'prop-types';
 import { MicrophoneRecorder } from '../libs/MicrophoneRecorder';
 import AudioContext           from '../libs/AudioContext';
@@ -12,7 +12,7 @@ import AudioPlayer            from '../libs/AudioPlayer';
 import Visualizer             from '../libs/Visualizer';
 
 
-export default class ReactMic extends Component {
+export default class ReactMic extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -74,11 +74,19 @@ export default class ReactMic extends Component {
 
   }
 
+  componentDidUpdate() {
+    this.visualize(); // set-up or stop canvas animation based on prop.record
+  }
+
   visualize= () => {
     const self = this;
-    const { backgroundColor, strokeColor, width, height, visualSetting } = this.props;
+    const { record, backgroundColor, strokeColor, width, height, visualSetting } = this.props;
     const { canvas, canvasCtx, analyser } = this.state;
 
+    if (!record) {
+      Visualizer.stopVisualization(canvasCtx, canvas, width, height, backgroundColor, strokeColor);
+      return;
+    }
     if(visualSetting === 'sinewave') {
       Visualizer.visualizeSineWave(analyser, canvasCtx, canvas, width, height, backgroundColor, strokeColor);
     } else if(visualSetting === 'frequencyBars') {

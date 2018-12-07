@@ -1,7 +1,25 @@
 let drawVisual;
 
 const Visualizer = {
+  stopVisualization: function stopVisualization(canvasCtx, canvas, width, height, backgroundColor, strokeColor) {
+    if (drawVisual) {
+      cancelAnimationFrame(drawVisual);
+      drawVisual = void 0;
+    }
 
+    // draw neutral straight line
+    canvasCtx.fillStyle = backgroundColor;
+    canvasCtx.fillRect(0, 0, width, height);
+
+    canvasCtx.lineWidth = 2;
+    canvasCtx.strokeStyle = strokeColor;
+
+    canvasCtx.beginPath();
+    canvasCtx.moveTo(0, height / 2);
+
+    canvasCtx.lineTo(width, height / 2);
+    canvasCtx.stroke();
+  },
   visualizeSineWave(analyser, canvasCtx, canvas, width, height, backgroundColor, strokeColor) {
     analyser.fftSize = 2048;
 
