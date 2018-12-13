@@ -1,5 +1,9 @@
 var drawVisual = void 0;
 
+var fpsInterval = 1000 / 30; // define default 30 frames per second
+var timeThen = void 0;
+var timeElapsed = void 0;
+
 var Visualizer = {
   stopVisualization: function stopVisualization(canvasCtx, canvas, width, height, backgroundColor, strokeColor) {
     if (drawVisual) {
@@ -20,49 +24,56 @@ var Visualizer = {
     canvasCtx.lineTo(width, height / 2);
     canvasCtx.stroke();
   },
-  visualizeSineWave: function visualizeSineWave(analyser, canvasCtx, canvas, width, height, backgroundColor, strokeColor) {
+  visualizeSineWave: function visualizeSineWave(analyser, canvasCtx, canvas, width, height, backgroundColor, strokeColor, fps) {
     analyser.fftSize = 2048;
+    fpsInterval = fps;
 
     var bufferLength = analyser.fftSize;
     var dataArray = new Uint8Array(bufferLength);
 
     canvasCtx.clearRect(0, 0, width, height);
 
-    function draw() {
-
+    function draw(time) {
       drawVisual = requestAnimationFrame(draw);
 
-      analyser.getByteTimeDomainData(dataArray);
+      timeElapsed = time - timeThen;
 
-      canvasCtx.fillStyle = backgroundColor;
-      canvasCtx.fillRect(0, 0, width, height);
+      if (timeElapsed > fpsInterval) {
+        timeThen = time - timeElapsed % fpsInterval;
 
-      canvasCtx.lineWidth = 2;
-      canvasCtx.strokeStyle = strokeColor;
+        analyser.getByteTimeDomainData(dataArray);
 
-      canvasCtx.beginPath();
+        canvasCtx.fillStyle = backgroundColor;
+        canvasCtx.fillRect(0, 0, width, height);
 
-      var sliceWidth = width * 1.0 / bufferLength;
-      var x = 0;
+        canvasCtx.lineWidth = 2;
+        canvasCtx.strokeStyle = strokeColor;
 
-      for (var i = 0; i < bufferLength; i++) {
-        var v = dataArray[i] / 128.0;
-        var y = v * height / 2;
+        canvasCtx.beginPath();
 
-        if (i === 0) {
-          canvasCtx.moveTo(x, y);
-        } else {
-          canvasCtx.lineTo(x, y);
+        var sliceWidth = width * 1.0 / bufferLength;
+        var x = 0;
+
+        for (var i = 0; i < bufferLength; i++) {
+          var v = dataArray[i] / 128.0;
+          var y = v * height / 2;
+
+          if (i === 0) {
+            canvasCtx.moveTo(x, y);
+          } else {
+            canvasCtx.lineTo(x, y);
+          }
+
+          x += sliceWidth;
         }
 
-        x += sliceWidth;
+        canvasCtx.lineTo(canvas.width, canvas.height / 2);
+        canvasCtx.stroke();
       }
-
-      canvasCtx.lineTo(canvas.width, canvas.height / 2);
-      canvasCtx.stroke();
     };
 
-    draw();
+    timeThen = performance.now();
+    draw(timeThen);
   },
   visualizeFrequencyBars: function visualizeFrequencyBars(analyser, canvasCtx, canvas, width, height, backgroundColor, strokeColor) {
     var self = this;

@@ -80,7 +80,7 @@ export default class ReactMic extends PureComponent {
 
   visualize= () => {
     const self = this;
-    const { record, backgroundColor, strokeColor, width, height, visualSetting } = this.props;
+    const { record, backgroundColor, strokeColor, width, height, visualSetting, fps } = this.props;
     const { canvas, canvasCtx, analyser } = this.state;
 
     if (!record) {
@@ -88,7 +88,7 @@ export default class ReactMic extends PureComponent {
       return;
     }
     if(visualSetting === 'sinewave') {
-      Visualizer.visualizeSineWave(analyser, canvasCtx, canvas, width, height, backgroundColor, strokeColor);
+      Visualizer.visualizeSineWave(analyser, canvasCtx, canvas, width, height, backgroundColor, strokeColor, fps);
     } else if(visualSetting === 'frequencyBars') {
       Visualizer.visualizeFrequencyBars(analyser, canvasCtx, canvas, width, height, backgroundColor, strokeColor);
     } else if(visualSetting === 'frequencyCircles') {
@@ -99,7 +99,7 @@ export default class ReactMic extends PureComponent {
 
   clear() {
     const { width, height } = this.props;
-    const { canvasCtx  } = this.state
+    const { canvasCtx } = this.state
     canvasCtx.clearRect(0, 0, width, height);
   }
 
@@ -131,7 +131,8 @@ ReactMic.propTypes = {
   height          : number,
   record          : bool.isRequired,
   onStop          : func,
-  onData          : func
+  onData          : func,
+  fps             : number
 };
 
 ReactMic.defaultProps = {
@@ -143,5 +144,6 @@ ReactMic.defaultProps = {
   record            : false,
   width             : 640,
   height            : 100,
-  visualSetting     : 'sinewave'
+  visualSetting     : 'sinewave',
+  fps               : 30
 }

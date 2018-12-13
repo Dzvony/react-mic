@@ -1,5 +1,9 @@
 let drawVisual;
 
+let fpsInterval = 1000 / 30; // define default 30 frames per second
+let timeThen;
+let timeElapsed;
+
 const Visualizer = {
   stopVisualization: function stopVisualization(canvasCtx, canvas, width, height, backgroundColor, strokeColor) {
     if (drawVisual) {
@@ -20,49 +24,56 @@ const Visualizer = {
     canvasCtx.lineTo(width, height / 2);
     canvasCtx.stroke();
   },
-  visualizeSineWave(analyser, canvasCtx, canvas, width, height, backgroundColor, strokeColor) {
+  visualizeSineWave(analyser, canvasCtx, canvas, width, height, backgroundColor, strokeColor, fps) {
     analyser.fftSize = 2048;
+    fpsInterval = fps;
 
     const bufferLength = analyser.fftSize;
     const dataArray = new Uint8Array(bufferLength);
 
     canvasCtx.clearRect(0, 0, width, height);
 
-    function draw() {
-
+    function draw(time) {
       drawVisual = requestAnimationFrame(draw);
 
-      analyser.getByteTimeDomainData(dataArray);
+      timeElapsed = time - timeThen;
 
-      canvasCtx.fillStyle = backgroundColor;
-      canvasCtx.fillRect(0, 0, width, height);
+      if (timeElapsed > fpsInterval) {
+        timeThen = time - (timeElapsed % fpsInterval);
 
-      canvasCtx.lineWidth = 2;
-      canvasCtx.strokeStyle = strokeColor;
+        analyser.getByteTimeDomainData(dataArray);
 
-      canvasCtx.beginPath();
+        canvasCtx.fillStyle = backgroundColor;
+        canvasCtx.fillRect(0, 0, width, height);
 
-      const sliceWidth = width * 1.0 / bufferLength;
-      let x = 0;
+        canvasCtx.lineWidth = 2;
+        canvasCtx.strokeStyle = strokeColor;
 
-      for(let i = 0; i < bufferLength; i++) {
-        const v = dataArray[i] / 128.0;
-        const y = v * height/2;
+        canvasCtx.beginPath();
 
-        if(i === 0) {
-          canvasCtx.moveTo(x, y);
-        } else {
-          canvasCtx.lineTo(x, y);
+        const sliceWidth = width * 1.0 / bufferLength;
+        let x = 0;
+
+        for(let i = 0; i < bufferLength; i++) {
+          const v = dataArray[i] / 128.0;
+          const y = v * height/2;
+
+          if(i === 0) {
+            canvasCtx.moveTo(x, y);
+          } else {
+            canvasCtx.lineTo(x, y);
+          }
+
+          x += sliceWidth;
         }
 
-        x += sliceWidth;
+        canvasCtx.lineTo(canvas.width, canvas.height/2);
+        canvasCtx.stroke();
       }
-
-      canvasCtx.lineTo(canvas.width, canvas.height/2);
-      canvasCtx.stroke();
     };
 
-    draw();
+    timeThen = performance.now();
+    draw(timeThen);
   },
 
   visualizeFrequencyBars(analyser, canvasCtx, canvas, width, height, backgroundColor, strokeColor) {

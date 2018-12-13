@@ -33,7 +33,8 @@ var ReactMic = function (_PureComponent) {
           strokeColor = _this$props.strokeColor,
           width = _this$props.width,
           height = _this$props.height,
-          visualSetting = _this$props.visualSetting;
+          visualSetting = _this$props.visualSetting,
+          fps = _this$props.fps;
       var _this$state = _this.state,
           canvas = _this$state.canvas,
           canvasCtx = _this$state.canvasCtx,
@@ -45,7 +46,7 @@ var ReactMic = function (_PureComponent) {
         return;
       }
       if (visualSetting === 'sinewave') {
-        Visualizer.visualizeSineWave(analyser, canvasCtx, canvas, width, height, backgroundColor, strokeColor);
+        Visualizer.visualizeSineWave(analyser, canvasCtx, canvas, width, height, backgroundColor, strokeColor, fps);
       } else if (visualSetting === 'frequencyBars') {
         Visualizer.visualizeFrequencyBars(analyser, canvasCtx, canvas, width, height, backgroundColor, strokeColor);
       } else if (visualSetting === 'frequencyCircles') {
@@ -162,7 +163,8 @@ process.env.NODE_ENV !== "production" ? ReactMic.propTypes = {
   height: number,
   record: bool.isRequired,
   onStop: func,
-  onData: func
+  onData: func,
+  fps: number
 } : void 0;
 
 ReactMic.defaultProps = {
@@ -174,5 +176,6 @@ ReactMic.defaultProps = {
   record: false,
   width: 640,
   height: 100,
-  visualSetting: 'sinewave'
+  visualSetting: 'sinewave',
+  fps: 30
 };
